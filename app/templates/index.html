@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="cards">
+  {% for k, n in counts.items() %}
+  <a class="card" href="{{ url_for('table_list', key=k) }}"><span class="n">{{ n }}</span><span>{{ TABLES[k].title }}</span></a>
+  {% endfor %}
+</div>
+<div class="two">
+<div>
+<h2>Orders not completed</h2>
+<table>
+  <tr><th>Order</th><th>Plate</th><th>Opened</th><th>Status</th></tr>
+  {% for o in open_orders %}
+  <tr><td>{{ o.orderid }}</td><td><a href="{{ url_for('history', plate=o.licenseplate) }}">{{ o.licenseplate }}</a></td><td>{{ o.opendate }}</td><td><span class="status">{{ o.status }}</span></td></tr>
+  {% else %}<tr><td colspan="4" class="muted">All orders are completed.</td></tr>{% endfor %}
+</table>
+</div>
+<div>
+<h2>Unpaid invoices</h2>
+<table>
+  <tr><th>Invoice</th><th>Plate</th><th>Issued</th><th class="r">Total (TL)</th></tr>
+  {% for i in unpaid %}
+  <tr><td>{{ i.invoiceid }}</td><td>{{ i.licenseplate }}</td><td>{{ i.issuedate }}</td><td class="r">{{ '%.2f'|format(i.totalamount|float) }}</td></tr>
+  {% else %}<tr><td colspan="4" class="muted">No unpaid invoices.</td></tr>{% endfor %}
+</table>
+</div>
+</div>
+{% endblock %}

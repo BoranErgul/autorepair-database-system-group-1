@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+<form class="form inline3">
+  <label>From <input type="date" name="start" value="{{ start }}"></label>
+  <label>To <input type="date" name="end" value="{{ end }}"></label>
+  <div class="buttons"><button>Apply period</button></div>
+</form>
+{% for title, (cols, rows) in reports %}
+<h2>{{ title }}</h2>
+<table>
+  <tr>{% for c in cols %}<th{% if c|lower in NUM_COLS %} class="r"{% endif %}>{{ HEADINGS.get(c|lower, c) }}</th>{% endfor %}</tr>
+  {% for r in rows %}<tr>{% for v in r %}{% set c = cols[loop.index0]|lower %}{% if v is number and c not in COUNT_COLS %}<td class="r">{{ '%.2f'|format(v|float) }}</td>{% elif v is number %}<td class="r">{{ v }}</td>{% else %}<td>{{ v }}</td>{% endif %}{% endfor %}</tr>
+  {% else %}<tr><td colspan="{{ cols|length }}" class="muted">No data for this period.</td></tr>{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

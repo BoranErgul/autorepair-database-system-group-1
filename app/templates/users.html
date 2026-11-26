@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<table>
+  <tr><th>ID</th><th>Username</th><th>Role</th><th></th></tr>
+  {% for u in users %}
+  <tr><td>{{ u.userid }}</td><td>{{ u.username }}</td><td><span class="role {{ u.role }}">{{ u.role }}</span></td>
+    <td class="actions">{% if u.userid != session.user_id %}
+      <form method="post" action="{{ url_for('user_delete', uid=u.userid) }}" onsubmit="return confirm('Delete this user?');"><button class="link danger">Delete</button></form>
+    {% endif %}</td></tr>
+  {% endfor %}
+</table>
+<h2>Add user</h2>
+<form method="post" class="form inline">
+  <label>Username <input name="username" required></label>
+  <label>Password <input name="password" type="password" minlength="6" required></label>
+  <label>Role <select name="role"><option>staff</option><option>admin</option></select></label>
+  <div class="buttons"><button>Create user</button></div>
+</form>
+<p class="muted">Passwords are saved as PBKDF2-SHA256 hashes. Nobody, including the admin, can read them.</p>
+{% endblock %}

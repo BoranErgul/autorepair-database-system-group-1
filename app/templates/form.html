@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.title }}{% endblock %}
+{% block content %}
+<h1>{{ 'Edit' if editing else 'New' }} · {{ t.title }}</h1>
+{% if t.hint %}<p class="muted">{{ t.hint }}</p>{% endif %}
+<form method="post" class="form">
+  {% for col, label, typ, req in t.fields %}
+  {% set val = row.get(col) if row else none %}
+  {% set locked = editing and col in t.pk %}
+  <label>{{ label }}{% if req and not (t.auto_pk and col in t.pk) %} *{% endif %}
+    {% if locked %}
+      {% set shown = namespace(v=val) %}
+      {% if col in opts %}{% for o in opts[col] %}{% if (o.values()|list)[0]|string == val|string %}{% set shown.v = (o.values()|list)[1] %}{% endif %}{% endfor %}{% endif %}
+      <input value="{{ shown.v }}" disabled>
+    {% elif col in opts %}
+      <select name="{{ col }}"{% if req %} required{% endif %}>
+        <option value="">– choose –</option>
+        {% for o in opts[col] %}{% set ov = (o.values()|list)[0] %}{% set ol = (o.values()|list)[1] %}
+        <option value="{{ ov }}"{% if val is not none and val|string == ov|string %} selected{% endif %}>{{ ol }}</option>{% endfor %}
+      </select>
+    {% elif typ is not string %}
+      <select name="{{ col }}"{% if req %} required{% endif %}>
+        {% if not req %}<option value="">– choose –</option>{% endif %}
+        {% for c in typ %}<option{% if val == c %} selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+    {% else %}
+      <input name="{{ col }}" value="{{ '' if val is none else val }}"
+        {% if typ == 'date' %}type="date"{% elif typ in ('int','num') %}type="number" step="{{ '1' if typ == 'int' else '0.01' }}" min="0"{% endif %}
+        {% if t.auto_pk and col in t.pk %}placeholder="leave empty for next ID"{% elif req %}required{% endif %}>
+    {% endif %}
+  </label>
+  {% endfor %}
+  <div class="buttons"><button>Save</button> <a href="{{ url_for('table_list', key=key) }}">Cancel</a></div>
+</form>
+{% endblock %}

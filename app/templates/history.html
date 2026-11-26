@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Vehicle history{% endblock %}
+{% block content %}
+<h1>Vehicle history</h1>
+<form class="form inline2" action="{{ url_for('history') }}">
+  <label>License plate <input name="plate" value="{{ plate }}" placeholder="e.g. 06 ABC 123" required></label>
+  <div class="buttons"><button>Search</button></div>
+</form>
+{% if vehicle %}
+<div class="box">
+  <h2>{{ vehicle.licenseplate }} · {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.year }})</h2>
+  <p>Owner: <b>{{ vehicle.firstname }} {{ vehicle.lastname }}</b> · {{ phones|join(', ') }}{% if vehicle.email %} · {{ vehicle.email }}{% endif %}</p>
+  <p class="muted">{{ orders|length }} repair order(s)</p>
+</div>
+{% for o in orders %}
+<div class="box">
+  <h3>Order {{ o.orderid }} · {{ o.opendate }}{% if o.completiondate %} → {{ o.completiondate }}{% endif %} <span class="status s-{{ o.status|lower|replace(' ', '') }}">{{ o.status }}</span></h3>
+  <p>{{ o.problemdescription }}</p>
+  <table>
+    <tr><th>Service</th><th>Mechanic</th><th class="r">Hours</th><th class="r">Labor (TL)</th></tr>
+    {% for s in o.services %}<tr><td>{{ s.description }}</td><td>{{ s.mechanic }}</td><td class="r">{{ '%.1f'|format(s.laborhours|float) }}</td><td class="r">{{ '%.2f'|format(s.laborcost|float) }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No services recorded.</td></tr>{% endfor %}
+  </table>
+  {% if o.parts %}
+  <table class="mt">
+    <tr><th>Part</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Cost (TL)</th></tr>
+    {% for p in o.parts %}<tr><td>{{ p.partname }}</td><td class="r">{{ p.quantity }}</td><td class="r">{{ '%.2f'|format(p.unitprice|float) }}</td><td class="r">{{ '%.2f'|format(p.cost|float) }}</td></tr>{% endfor %}
+  </table>{% endif %}
+  <p class="inv">{% if o.invoice %}Invoice {{ o.invoice.invoiceid }} · {{ '%.2f'|format(o.invoice.totalamount|float) }} TL · <span class="status s-{{ o.invoice.paymentstatus|lower }}">{{ o.invoice.paymentstatus }}</span>{% else %}<span class="muted">No invoice yet.</span>{% endif %}</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.title }}{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>{{ t.title }}</h1>
+  {% if can('add', key) %}<a class="btn" href="{{ url_for('table_new', key=key) }}">+ Add new</a>{% endif %}
+</div>
+{% set has_edit = can('edit', key) and t.fields|length > t.pk|length %}
+<table>
+  <tr>{% for col, label, typ, req in t.fields %}<th>{{ label }}</th>{% endfor %}{% if has_edit or can('delete', key) %}<th></th>{% endif %}</tr>
+  {% for r in rows %}
+  <tr>
+    {% for col, label, typ, req in t.fields %}
+      <td>{% if col == 'licenseplate' %}<a href="{{ url_for('history', plate=r[col]) }}">{{ r[col] }}</a>
+          {% elif col in labels %}{{ labels[col].get(r[col], r[col]) }}
+          {% elif r[col] is none %}<span class="muted">–</span>
+          {% elif typ == 'num' %}{{ '%.2f'|format(r[col]|float) }}
+          {% elif col == 'status' or col == 'paymentstatus' %}<span class="status s-{{ r[col]|lower|replace(' ', '') }}">{{ r[col] }}</span>
+          {% else %}{{ r[col] }}{% endif %}</td>
+    {% endfor %}
+    {% if has_edit or can('delete', key) %}
+    <td class="actions">
+      {% if has_edit %}<a href="{{ url_for('table_edit', key=key, id=pk_str(t, r)) }}">Edit</a>{% endif %}
+      {% if can('delete', key) %}
+      <form method="post" action="{{ url_for('table_delete', key=key, id=pk_str(t, r)) }}" onsubmit="return confirm('Delete this record?');">
+        <button class="link danger">Delete</button>
+      </form>{% endif %}
+    </td>{% endif %}
+  </tr>
+  {% else %}<tr><td colspan="{{ t.fields|length + 1 }}" class="muted">No records.</td></tr>{% endfor %}
+</table>
+{% if session.role == 'staff' and not can('add', key) %}<p class="muted">Your role can only view this table.</p>{% endif %}
+{% endblock %}
