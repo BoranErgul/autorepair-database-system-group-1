@@ -21,8 +21,8 @@ Main features:
 You only need Docker (Docker Desktop on Windows/macOS).
 
 ```bash
-git clone https://github.com/BoranErgul/autorepair-database-system-group-X.git
-cd autorepair-database-system-group-X
+git clone https://github.com/BoranErgul/autorepair-database-system-group-1.git
+cd autorepair-database-system-group-1
 docker compose up
 ```
 
